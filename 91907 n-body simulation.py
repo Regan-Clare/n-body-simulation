@@ -1,6 +1,5 @@
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
-import math  # allows the use of mathematical constants
 import matplotlib.animation as anim  # allows for animating the particles
 
 # CANVAS
@@ -16,13 +15,15 @@ dt = 0.1  # this is the time step. dt meaning change in time.
 
 M = np.array([0.2*EM, EM, 10*EM])  # this 3x1 vector represents the mass of each
 
-P = np.array([[1.5, 5],  # 3x2 matrix accounts for three particles and their relative initial positions
+P = np.array([[1.5, 5],  # 3x2 matrix accounts for three particles and their relative initial positions. (x, y)
               [2, 5],
               [5, 5]])
 
-v = np.array([[0, -2],  # 3x2 matrix accounts for three particles and their relative initial velocities
+v = np.array([[0, -2],  # 3x2 matrix accounts for three particles and their relative initial velocities (x, y)
               [20, -20],
               [0, 0]])
+
+nP = np.array([], [])  # new position for x and y values
 
 
 # add particles to canvas
@@ -39,7 +40,7 @@ for i in range(NumParticles):
     ax.scatter(P[i, 0], P[i, 1], s=ParticleSizes[i], color=ParticleColours[i])
 
 
-def update():
+def update(frame):
     global P
     global v
 
@@ -61,6 +62,15 @@ def update():
     acceleration = fg / M[:, np.newaxis]  # F = ma (Newton's Second Law)
     v += acceleration * dt  # a = v/t => v = a*t
     P += v * dt  # position changes with respect to velocity over a change in time
+
+    for i in range(NumParticles):
+        nP[i] += dt * P[i, 0]
+        nP[i] += dt * P[i, 1]
+        nP[i].append(P[i, 0])
+        nP[i].append(P[i, 1])
+
+
+meh = anim.FuncAnimation(fig, update, interval=1, blit=True, frame=200)
 
 
 plt.show()
