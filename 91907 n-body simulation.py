@@ -8,22 +8,30 @@ ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
 
 # defining initial conditions
-NumParticles = 3  # number of particles
 EM = 5.972e24  # Earth's Mass
 G = 6.6743e-11  # Gravitational constant
 dt = 0.1  # this is the time step. dt meaning change in time.
 
-M = np.array([0.2*EM, EM, 10*EM])  # this 3x1 vector represents the mass of each
 
-P = np.array([[1.5, 5],  # 3x2 matrix accounts for three particles and their relative initial positions. (x, y)
-              [2, 5],
-              [5, 5]])
+def initial_conditions():
+    global NumParticles, masses, nP, velocities, m
+    NumParticles = int(input("How many particles in this system?: "))
+    masses = []
+    nP = []  # new position for x and y values
+    velocities = []
+    for i in range(NumParticles):
+        m = float(input(f"Mass of particle {i+1}: "))
+        masses.append(m)
+        x = float(input(f"x-position of particle {i+1}: "))
+        y = float(input(f"y-position of particle {i+1}: "))
+        nP.append([x, y])
+        vx = float(input(f"x-velocity of particle {i+1}: "))
+        vy = float(input(f"y-velocity of particle {i+1}: "))
+        velocities.append([vx, vy])
 
-v = np.array([[0, -2],  # 3x2 matrix accounts for three particles and their relative initial velocities (x, y)
-              [20, -20],
-              [0, 0]])
 
-nP = np.array([], [])  # new position for x and y values
+initial_conditions()
+
 
 
 # add particles to canvas
@@ -37,10 +45,10 @@ ParticleSizes = [20, 100, 1000]  # sizes of particles
 # 0 being the first column x, and 1 being the second column y
 # these basically refer back to the matrices/arrays I made earlier
 for i in range(NumParticles):
-    ax.scatter(P[i, 0], P[i, 1], s=ParticleSizes[i], color=ParticleColours[i])
+    ax.scatter(nP[0], nP[1], s=ParticleSizes[i], color=ParticleColours[i])
 
 
-def update(frame):
+def update():
     global P
     global v
 
@@ -54,23 +62,20 @@ def update(frame):
     fg = np.zeros_like(P)
     for i in range(NumParticles):  # for i particles
         for j in range(i + 1, NumParticles):  # for j particles
-            F = G * M[i] * M[j] / dr[i][j] ** 2  # Newton's Universal Law of Gravitation
+            F = G * m[i] * m[j] / dr[i][j] ** 2  # Newton's Universal Law of Gravitation
             fg[i] += F * (P[j] - P[i]) / dr[i][j]
             fg[j] += -F * (P[j] - P[i]) / dr[i][j]
 
     # this updates the acceleration, velocity, and position of each particle
-    acceleration = fg / M[:, np.newaxis]  # F = ma (Newton's Second Law)
+    acceleration = fg / m[:, np.newaxis]  # F = ma (Newton's Second Law)
     v += acceleration * dt  # a = v/t => v = a*t
     P += v * dt  # position changes with respect to velocity over a change in time
 
-    for i in range(NumParticles):
+    for i in range(NumParticles):  # this accounts for new position over time
         nP[i] += dt * P[i, 0]
         nP[i] += dt * P[i, 1]
         nP[i].append(P[i, 0])
         nP[i].append(P[i, 1])
-
-
-meh = anim.FuncAnimation(fig, update, interval=1, blit=True, frame=200)
 
 
 plt.show()
