@@ -12,7 +12,7 @@ EM = 5.972e24  # Earth's Mass
 G = 6.6743e-11  # Gravitational constant
 dt = 0.1  # this is the time step. dt meaning change in time.
 
-
+# g
 def initial_conditions():
     global NumParticles, masses, nP, velocities, m
     NumParticles = int(input("How many particles in this system?: "))
