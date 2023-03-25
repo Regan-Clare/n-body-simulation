@@ -1,36 +1,42 @@
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
-import math  # allows the use of mathematical constants
-from matplotlib.animation import FuncAnimation  # allows for animating the particles
+import matplotlib.animation as anim  # allows for animating the particles
 
 # CANVAS
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
-# defining initial conditions
 
-NumParticles = 3  # number of particles
+# defining initial conditions
 EM = 5.972e24  # Earth's Mass
 G = 6.6743e-11  # Gravitational constant
 dt = 0.1  # this is the time step. dt meaning change in time.
 
-# this 3x1 vector represents the mass of each
-mass = np.array([EM, 2*EM, 3*EM])
+# gdsda
+def initial_conditions():
+    global NumParticles, masses, nP, velocities, m
+    NumParticles = int(input("How many particles in this system?: "))
+    masses = []
+    nP = []  # new position for x and y values
+    velocities = []
+    for i in range(NumParticles):
+        m = float(input(f"Mass of particle {i+1}: "))
+        masses.append(m)
+        x = float(input(f"x-position of particle {i+1}: "))
+        y = float(input(f"y-position of particle {i+1}: "))
+        nP.append([x, y])
+        vx = float(input(f"x-velocity of particle {i+1}: "))
+        vy = float(input(f"y-velocity of particle {i+1}: "))
+        velocities.append([vx, vy])
 
-# 3x2 matrix accounts for three particles and their relative positions
-position = np.array([[7, 5],
-                     [2, 5],
-                     [5, 5]])
 
-# 3x2 matrix accounts for three particles and their relative velocities
-velocity = np.array([[2, 2],
-                     [-2, -2],
-                     [0, 0]])
+initial_conditions()
+
 
 
 # add particles to canvas
-ParticleColours = ['red', 'green', 'blue']  # colours of the particles
-ParticleSizes = [50, 100, 150]  # sizes of particles
+ParticleColours = ['grey', 'green', 'yellow']  # colours of the particles
+ParticleSizes = [20, 100, 1000]  # sizes of particles
 
 # here, scatter is a method to plot objects and uses ax as a reference frame
 # this means that when 'i' is the number of particles, then...
@@ -39,31 +45,37 @@ ParticleSizes = [50, 100, 150]  # sizes of particles
 # 0 being the first column x, and 1 being the second column y
 # these basically refer back to the matrices/arrays I made earlier
 for i in range(NumParticles):
-    ax.scatter(position[i, 0], position[i, 1], s=ParticleSizes[i], color=ParticleColours[i])
+    ax.scatter(nP[0], nP[1], s=ParticleSizes[i], color=ParticleColours[i])
 
 
 def update():
-    global position
-    global velocity
+    global P
+    global v
 
     # calculate pairwise distances between particles, subtract.outer() computes out level of products for vectors/arrays
-    dx = np.subtract.outer(position[:, 0], position[:, 0])  # difference of [i, j] for x input
-    dy = np.subtract.outer(position[:, 1], position[:, 1])  # difference of [i, j] for y input
+    dx = np.subtract.outer(P[:, 0], P[:, 0])  # difference of [i, j] for x input
+    dy = np.subtract.outer(P[:, 1], P[:, 1])  # difference of [i, j] for y input
     dr = np.sqrt(dx ** 2 + dy ** 2)  # uses element-wise sqrt to return non-negative sqrt of an array for each element
     # it calculates the sum of the squares of the elements dy and dx, giving pairwise distances between all particles
 
     # calculating pairwise gravitational forces using Newtons Law of Gravitation F = (G*mi*mj)/r^2
-    fg = np.zeros_like(position)
+    fg = np.zeros_like(P)
     for i in range(NumParticles):  # for i particles
         for j in range(i + 1, NumParticles):  # for j particles
-            F = G * mass[i] * mass[j] / dr[i][j] ** 2
-            fg[i] += F * (position[j] - position[i]) / dr[i][j]
-            fg[j] += -F * (position[j] - position[i]) / dr[i][j]
+            F = G * m[i] * m[j] / dr[i][j] ** 2  # Newton's Universal Law of Gravitation
+            fg[i] += F * (P[j] - P[i]) / dr[i][j]
+            fg[j] += -F * (P[j] - P[i]) / dr[i][j]
 
     # this updates the acceleration, velocity, and position of each particle
-    acceleration = fg / mass[:, np.newaxis]
-    velocity += acceleration * dt
-    position += velocity * dt
+    acceleration = fg / m[:, np.newaxis]  # F = ma (Newton's Second Law)
+    v += acceleration * dt  # a = v/t => v = a*t
+    P += v * dt  # position changes with respect to velocity over a change in time
+
+    for i in range(NumParticles):  # this accounts for new position over time
+        nP[i] += dt * P[i, 0]
+        nP[i] += dt * P[i, 1]
+        nP[i].append(P[i, 0])
+        nP[i].append(P[i, 1])
 
 
 plt.show()
