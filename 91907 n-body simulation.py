@@ -1,16 +1,20 @@
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
-import matplotlib.animation as anim  # allows for animating the particles
+from matplotlib.animation import FuncAnimation  # allows for animating the particles
 
 # CANVAS
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
 # defining initial conditions
-EM = 5.972e24  # Earth's Mass
+EM = 5  # 5.972e24 Earth's Mass
 G = 6.6743e-11  # Gravitational constant
 dt = 0.1  # this is the time step. dt meaning change in time.
+NumParticles = 2  # has to be >= 2 to avoid errors in pairwise calculations (dP and dv = (N, 2)
 
+# initialize dP and dv with zeros
+dP = np.zeros((NumParticles, 2))
+dv = np.zeros((NumParticles, 2))
 
 def initial_conditions():
     global NumParticles, m, P, v, dP, dv
@@ -26,10 +30,12 @@ def initial_conditions():
     m = [EM] * NumParticles
     P = np.random.rand(NumParticles, 2) * 10  # initial positions
     v = np.zeros((NumParticles, 2))  # initial velocities
+    dP = np.copy(P)  # initialize dP with the initial positions
+    dv = np.copy(v)  # initialize dv with the initial velocities
 
     for i in range(NumParticles):
-        x = np.random.uniform(0, 9.9)  # values at 9.9 so particles don't hit edge of system
-        y = np.random.uniform(0, 9.9)
+        x = np.random.uniform(0, 9.8)  # values at 9.8 so particles don't hit edge of system
+        y = np.random.uniform(0, 9.8)
         P[i] = np.array([x, y])
 
 
@@ -42,10 +48,10 @@ initial_conditions()
 # 0 being the first column x, and 1 being the second column y
 # these basically refer back to the matrices/arrays I made earlier
 for i in range(NumParticles):
-    ax.scatter(P[i, 0], P[i, 1], s=40, c='grey')  # x-position, y-position, size, colour
+    ax.scatter(P[i, 0], P[i, 1], s=40, c='black')  # x-position, y-position, size, colour
 
 
-def update():
+def update(frame):
     global dP  # change in position
     global dv  # change in velocity
 
@@ -68,11 +74,11 @@ def update():
     dv += acceleration * dt  # a = v/t => v = a*t
     dP += v * dt  # position changes with respect to velocity over a change in time
 
-    for i in range(NumParticles):  # this accounts for new position over time
-        P[i] += dt * dP[i, 0]
-        P[i] += dt * dP[i, 1]
-        P[i].append(dP[i, 0])
-        P[i].append(dP[i, 1])
+    for i in range(NumParticles):
+        P[i, 0] += dt * dP[i, 0]
+        P[i, 1] += dt * dP[i, 1]
 
+
+animation = FuncAnimation(fig, func=update, frames=np.arange(0, 10, 0.01), interval=50, blit=True)
 
 plt.show()
