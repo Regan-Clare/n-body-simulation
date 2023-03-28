@@ -1,6 +1,6 @@
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
-from matplotlib.animation import FuncAnimation  # allows for animating the particles
+import matplotlib.animation as anim  # allows for animating the particles
 
 # CANVAS
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
@@ -10,33 +10,21 @@ ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 EM = 5  # 5.972e24 Earth's Mass
 G = 6.6743e-11  # Gravitational constant
 dt = 0.1  # this is the time step. dt meaning change in time.
-NumParticles = 2  # has to be >= 2 to avoid errors in pairwise calculations (dP and dv = (N, 2)
+NumParticles = int(input("How many particles in this system?: "))
 
-# initialize dP and dv with zeros
-dP = np.zeros((NumParticles, 2))
-dv = np.zeros((NumParticles, 2))
+m = [EM] * NumParticles
+P = np.random.rand(NumParticles, 2) * 9.8  # initial positions [x, y], at 9.8 so, it doesn't hit the edge
+v = np.zeros((NumParticles, 2))  # initial velocities [dx, dy]
+dP = []  # new positions [cy, cx]
+
+curve, = ax.plot([], [])
+obj, = plt.plot([], [])
+
 
 def initial_conditions():
-    global NumParticles, m, P, v, dP, dv
-    NumParticles = int(input("How many particles in this system?: "))
-    try:  # this prevents non integers and values < 2 from being entered
-        while True:
-            if NumParticles < 2:
-                initial_conditions()
-            else:
-                break
-    except ValueError:
-        initial_conditions()
-    m = [EM] * NumParticles
-    P = np.random.rand(NumParticles, 2) * 10  # initial positions
-    v = np.zeros((NumParticles, 2))  # initial velocities
-    dP = np.copy(P)  # initialize dP with the initial positions
-    dv = np.copy(v)  # initialize dv with the initial velocities
-
-    for i in range(NumParticles):
-        x = np.random.uniform(0, 9.8)  # values at 9.8 so particles don't hit edge of system
-        y = np.random.uniform(0, 9.8)
-        P[i] = np.array([x, y])
+    curve.set_data([], [])
+    obj.set_data([], [])
+    return curve, obj,
 
 
 initial_conditions()
@@ -52,33 +40,23 @@ for i in range(NumParticles):
 
 
 def update(frame):
-    global dP  # change in position
-    global dv  # change in velocity
-
-    # calculate pairwise distances between particles, subtract.outer() computes out level of products for vectors/arrays
-    dx = np.subtract.outer(dP[:, 0], dP[:, 0])  # difference of [i, j] for x input
-    dy = np.subtract.outer(dP[:, 1], dP[:, 1])  # difference of [i, j] for y input
-    dr = np.sqrt(dx ** 2 + dy ** 2)  # uses element-wise sqrt to return non-negative sqrt of an array for each element
-    # it calculates the sum of the squares of the elements dy and dx, giving pairwise distances between all particles
-
-    # calculating pairwise gravitational forces using Newtons Law of Gravitation F = (G*mi*mj)/r^2
-    fg = np.zeros_like(dP)
-    for i in range(NumParticles):  # for i particles
-        for j in range(i + 1, NumParticles):  # for j particles
-            F = G * m[i] * m[j] / dr[i][j] ** 2  # Newton's Universal Law of Gravitation
-            fg[i] += F * (dP[j] - dP[i]) / dr[i][j]
-            fg[j] += -F * (dP[j] - dP[i]) / dr[i][j]
-
-    # this updates the acceleration, velocity, and position of each particle
-    acceleration = fg / m[:, np.newaxis]  # F = ma (Newton's Second Law)
-    dv += acceleration * dt  # a = v/t => v = a*t
-    dP += v * dt  # position changes with respect to velocity over a change in time
-
-    for i in range(NumParticles):
-        P[i, 0] += dt * dP[i, 0]
-        P[i, 1] += dt * dP[i, 1]
+    global P, v, r
+    for i in range(2):
+        j = (i + 1) % 2
+        v[i, 0] += dt * m[j] * (P[j, 0] - P[i, 0]) / ((P[j, 0] - P[i, 0]) ** 2 + (P[j, 1] - P[i, 1]) ** 2) ** 1.5
+        v[i, 1] += dt * m[j] * (P[j, 1] - P[i, 1]) / ((P[j, 0] - P[i, 0]) ** 2 + (P[j, 1] - P[i, 1]) ** 2) ** 1.5
+        v[2, 0] += dt * m[i] * (P[i, 0] - P[2, 0]) / ((P[i, 0] - P[2, 0]) ** 2 + (P[i, 1] - P[2, 1]) ** 2) ** 1.5
+        v[2, 1] += dt * m[i] * (P[i, 1] - P[2, 1]) / ((P[i, 0] - P[2, 0]) ** 2 + (P[i, 1] - P[2, 1]) ** 2) ** 1.5
+    for i in range(3):
+        P[i, 0] += dt * v[i, 0]
+        P[i, 1] += dt * v[i, 1]
+        dP[i].append(P[i, 0])
+        dP[i].append(P[i, 1])
+    curve.set_data(dP[i])
+    obj.set_data(P[i, 0], P[i, 1])
+    return curve, obj,
 
 
-animation = FuncAnimation(fig, func=update, frames=np.arange(0, 10, 0.01), interval=50, blit=True)
+ani = anim.FuncAnimation(fig, update, init_func=initial_conditions, interval=1, blit=True, save_count=9000)
 
 plt.show()
