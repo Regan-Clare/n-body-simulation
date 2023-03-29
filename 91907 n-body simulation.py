@@ -50,10 +50,10 @@ def update(frame):
             r = np.sqrt(dx ** 2 + dy ** 2)
             fx = m * dx / (r ** 3)
             fy = m * dy / (r ** 3)
-            vx[i] += dt * fx
-            vy[i] += dt * fy
-            vx[j] -= dt * fx
-            vy[j] -= dt * fy
+            x[i] += dt * fx
+            y[i] += dt * fy
+            x[j] -= dt * fx
+            y[j] -= dt * fy
         x[i] += dt * vx[i]
         y[i] += dt * vy[i]
         cx[i].append(x[i])
