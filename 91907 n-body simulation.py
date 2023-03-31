@@ -8,19 +8,20 @@ ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
 # defining initial conditions
 NumParticles = int(input("How many particles in this system?: "))
-m = 2  # 5.972e24 Earth's Mass
+m = 5  # 5.972e24 Earth's Mass
 dt = 0.01  # this is the time step. dt meaning change in time.
 
 
 x = np.random.uniform(low=0.2, high=9.8, size=NumParticles)  # initial positions [x]
 y = np.random.uniform(low=0.2, high=9.8, size=NumParticles)  # initial positions [y]
-vx = np.random.uniform(low=0, high=0.1, size=NumParticles)  # initial x-velocity
-vy = np.random.uniform(low=0, high=0.1, size=NumParticles)  # initial y-velocity
+vx = np.random.uniform(low=0, high=0.3, size=NumParticles)  # initial x-velocity
+vy = np.random.uniform(low=0, high=0.3, size=NumParticles)  # initial y-velocity
 
 cx = [[] for _ in range(NumParticles)]  # new positions for x-axis
 cy = [[] for _ in range(NumParticles)]  # new positions for y-axis
 
 scatter_list = []
+
 for i in range(NumParticles):
     cx[i] = []
     cy[i] = []
@@ -28,8 +29,6 @@ for i in range(NumParticles):
     scatter_list.append(scatter)
 
 line, = ax.plot([], [], '-', color='blue')
-
-curve, = ax.plot([], [])
 
 
 def initial_conditions():
@@ -43,11 +42,10 @@ def initial_conditions():
 
 initial_conditions()
 
-r = 0
-
 
 def update(frame):
-    global x, y, vx, vy, r
+    global x, y, vx, vy, r, cx, cy
+    r = 0  # this is just so r is initialized before the nested for loop
 
     for i in range(NumParticles):
         for j in range(i + 1, NumParticles):
@@ -62,9 +60,12 @@ def update(frame):
             vy[j] -= dt * fy
         x[i] += dt * vx[i]
         y[i] += dt * vy[i]
+        cx[i].append(x[i])  # store new/previous positions - doesn't matter
+        cy[i].append(y[i])  # store new/previous positions - doesn't matter
         scatter_list[i].set_data(x[i], y[i])
 
-    line.set_data(x, y)
+    for i in range(NumParticles):
+        line.set_data(cx[i], cy[i])  # plot curve for each particle
 
     return scatter_list + [line]
 
