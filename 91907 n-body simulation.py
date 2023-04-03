@@ -6,6 +6,7 @@ import matplotlib.animation as anim  # allows for animating the particles
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
+
 # defining initial conditions
 NumParticles = int(input("How many particles in this system?: "))
 m = 5  # 5.972e24 Earth's Mass
@@ -21,20 +22,20 @@ cx = [[] for _ in range(NumParticles)]  # new positions for x-axis
 cy = [[] for _ in range(NumParticles)]  # new positions for y-axis
 
 scatter_list = []  # empty list for plotting positions
-
+line_list = []  # empty list for plotting line positions
 for i in range(NumParticles):
     cx[i] = []  # empty list for x-position of line for ith particle
     cy[i] = []  # empty list for y-position of line for ith particle
     scatter, = ax.plot([], [], 'o', markersize=5, color='black')  # plots the particles on the graph
     scatter_list.append(scatter)  # appends the scatter values to the scatter list
-    line, = ax.plot([], [], '-', color='blue')  # plots the trail lines on the graph
+    line, = ax.plot([], [], '-', color='purple')  # plots the trail lines on the graph
+    line_list.append(line)  # appends the line values to the line list
 
 
 def initial_conditions():
     for i in range(NumParticles):
         scatter_list[i].set_data(x[i], y[i])  # setting x, y data corresponding to the ith particle in initial position
-
-    line.set_data([], [])  # setting data of the line to empty lists, clearing any drawn curve before animation begins
+        line_list[i].set_data(cx[i], cy[i])  # setting x, y data corresponding to the ith particle in initial position
 
     return scatter_list + [line]
 
@@ -62,11 +63,16 @@ def update(frame):
         cx[i].append(x[i])  # store new/ positions to list of previous positions (this is for line)
         cy[i].append(y[i])  # store new/ positions to list of previous positions (this is for line)
         scatter_list[i].set_data(x[i], y[i])  # updating x and y on scatter plot for the ith particle
+        line_list[i].set_data(cx[i], cy[i])  # updating x and y for lines that follow ith particle
+
+    if dx or dy < 1:
+        dx = dx + 1
+        dy = dy + 1
 
     for i in range(NumParticles):
         line.set_data(cx[i], cy[i])  # plot curve for each particle
 
-    return scatter_list + [line]
+    return scatter_list + [line] + line_list
 
 
 ani = anim.FuncAnimation(fig, update, init_func=initial_conditions, interval=1, blit=True, save_count=9000)
