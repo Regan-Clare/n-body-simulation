@@ -7,6 +7,7 @@ from matplotlib.widgets import TextBox  # allows me to use text widgets
 
 # I am writing variables in lowerCamelCase and functions in snake_case
 
+# SECTION 1 - PARAMETERS AND CANVAS/GRAPH
 
 # defining initial conditions
 numParticles = int(input("How many particles in this system?: "))  # number of particles in the system
@@ -20,8 +21,8 @@ y = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions
 vx = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial x-velocity
 vy = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial y-velocity
 
-cx = [[] for _ in range(numParticles)]  # new positions for x-axis
-cy = [[] for _ in range(numParticles)]  # new positions for y-axis
+cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
+cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
 
 
 # CANVAS
@@ -29,11 +30,12 @@ fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
 
-# NUMBER OF PARTICLES DISPLAY
+# Graph titles and axis names
 plt.title("{}-body Simulation".format(numParticles))  # title for simulation
 plt.xlabel("Astronomical Unit (AU)")  # x-label
 plt.ylabel("Astronomical Unit (AU)")  # y-label
 
+# SECTION 2 - BUTTONS AND UI
 
 # PAUSE BUTTON
 animationStop = False
@@ -54,7 +56,7 @@ pauseButton.on_clicked(on_pause)  # when button is clicked, run onPause function
 
 
 # REPLAY BUTTON
-# I came up with the idea that I'd need to save the initial conditions in a list, then access them for the reset
+# I decided the best way to approach this is to save the initial conditions in a list, then access them for the reset
 initialConditionsLog = []
 
 
@@ -82,39 +84,64 @@ replayButton = Button(replayButtonPos, 'Replay', color='white', hovercolor='grey
 replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run replay function
 
 
-# Change Number of Particles
+# CHANGE NUMBER OF PARTICLES
 def change_num_particles(num):
-    global numParticles, x, y, vx, vy
+    global numParticles, x, y, vx, vy, cx, cy, scatterList, scatter
     try:
         numParticles = int(num)
     except ValueError:
-        print("Error: Input value is not a valid integer")
         return
-    initialConditionsLog.clear()
+
+    # update title with new number of particles
+    ax.set_title("{}-body Simulation".format(numParticles))
+
+    # new positions and velocities
+    x = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [x]
+    y = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [y]
+    vx = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial x-velocity
+    vy = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial y-velocity
+    cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
+    cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
+
+    # remove old scatter plot
+    for s in scatterList:
+        s.remove()
+    # calling functions - basically re-running the code
+    lines()
     save_initial_conditions()
-    return scatterList + lineList
+    initial_conditions()
+    update(frame=60)
 
 
 particleTextPos = plt.axes([0.58, 0.95, 0.05, 0.05])  # position of replay function
-particleText = TextBox(particleTextPos, 'Change Number of Bodies to:', color='white', hovercolor='grey')  # conditions for particle text
-particleText.on_submit(lambda text: change_num_particles(text))
+particleText = TextBox(particleTextPos, 'Change Number of Bodies to:', color='white', hovercolor='grey')
+particleText.on_text_change(change_num_particles)  # when text is submitted, run the function
 
 
-# LISTS
-lineList = []  # empty list for plotting line positions
-scatterList = []  # empty list for plotting positions
-for i in range(numParticles):
-    cx[i] = []  # empty list for x-position of line for ith particle
-    cy[i] = []  # empty list for y-position of line for ith particle
-    scatter, = ax.plot([], [], 'o', markersize=4, color='black')  # plots the particles on the graph
-    # z-order determines the order in which different elements are drawn, since 3 > z-order of lines, particles in front
-    # short for z-axis-order
-    scatter.set_zorder(3)  # brings particles to the front, in front of lines
-    scatterList.append(scatter)  # appends the scatter values to the scatter list
-    line, = ax.plot([], [], '-', color='purple')  # plots the trail lines on the graph
-    lineList.append(line)  # appends the line values to the line list
+# SECTION 3 - FUNCTIONS
+
+# trail line function
+def lines():
+    global lineList, scatterList, line, cy, cx
+    # Lists
+    lineList = []  # empty list for plotting line positions
+    scatterList = []  # empty list for plotting positions
+    for i in range(numParticles):
+        cx[i] = []  # empty list for x-position of line for ith particle
+        cy[i] = []  # empty list for y-position of line for ith particle
+        scatter, = ax.plot([], [], 'o', markersize=4, color='black')  # plots the particles on the graph
+        # z-order determines the order in which different elements are drawn, since 3 > z, particles in front of lines
+        # short for z-axis-order
+        scatter.set_zorder(3)  # brings particles to the front, in front of lines
+        scatterList.append(scatter)  # appends the scatter values to the scatter list
+        line, = ax.plot([], [], '-', color='purple')  # plots the trail lines on the graph
+        lineList.append(line)  # appends the line values to the line list
 
 
+lines()
+
+
+# initial conditions
 def initial_conditions():
     for i in range(numParticles):
         lineList[i].set_data(cx[i], cy[i])  # setting x, y data corresponding to the ith particle in initial position
@@ -129,6 +156,7 @@ initial_conditions()
 softening_length = 0.2  # softening for collisions to mitigate unrealistic collisions
 
 
+# updating parameters
 def update(frame):
     global x, y, vx, vy, r, cx, cy, animationStop
     r = 0  # this is just so r is initialized before the nested for loop
