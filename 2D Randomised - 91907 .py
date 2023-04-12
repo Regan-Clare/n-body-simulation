@@ -1,14 +1,14 @@
-import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
-import matplotlib.pyplot as plt  # use for plotting data on a canvas
-import matplotlib.animation as anim  # allows for animating the particles
-from matplotlib.widgets import Button  # allows me to use button widgets
-from matplotlib.widgets import TextBox  # allows me to use text widgets
-
 # NOTES:
 # I am writing variables in lowerCamelCase and functions in snake_case
 # This n-body simulation has randomised initial positions and velocities.
 # The mass, colours of particles/buttons/lines, and range of velocities and positions can be changed in the code
 # The parameters are NOT realistic, I am not using realistic time, velocity, mass, distance, and gravitational constant
+
+import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
+import matplotlib.pyplot as plt  # use for plotting data on a canvas
+import matplotlib.animation as anim  # allows for animating the particles
+from matplotlib.widgets import Button  # allows me to use button widgets
+from matplotlib.widgets import TextBox  # allows me to use text widgets
 
 # SECTION 1 - PARAMETERS AND CANVAS/GRAPH
 
@@ -171,7 +171,7 @@ def initial_conditions():
 initial_conditions()
 
 
-softening_length = 0.2  # softening for collisions to mitigate unrealistic collisions
+softeningLength = 0.2  # softening for collisions to mitigate unrealistic collisions
 
 
 # updating parameters
@@ -188,8 +188,8 @@ def update(frame):
             dy = y[j] - y[i]  # calculates difference of y-position of jth particle to y-position of ith particle
             r = np.sqrt(dx ** 2 + dy ** 2)  # pair-wise distance between two objects, calculated using pythagoras
             # check for collision
-            if r < softening_length:  # if the radius is less than 0.1...
-                r = softening_length  # set it to 0.1
+            if r < softeningLength:  # if the radius is less than 0.1...
+                r = softeningLength  # set it to 0.1
 
             fx = m * dx / (r ** 3)  # x-component of the force between 'i' and 'j'
             fy = m * dy / (r ** 3)  # y-component of the force between 'i' and 'j'
