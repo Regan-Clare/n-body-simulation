@@ -10,7 +10,16 @@ from matplotlib.widgets import TextBox  # allows me to use text widgets
 # SECTION 1 - PARAMETERS AND CANVAS/GRAPH
 
 # defining initial conditions
-numParticles = int(input("How many particles in this system?: "))  # number of particles in the system
+numParticles = int(input("How many particles in this system?: "))
+# fixing value errors for start of simulation
+while numParticles < 1:
+    try:
+        numParticles = int(input("How many particles in this system?: "))
+        if numParticles < 1:
+            print("Number of particles must be greater than or equal to 1. Please try again.")
+    except ValueError:
+        print("Invalid input. Please enter a valid integer.")
+
 m = 2  # Mass
 dt = 0.005  # this is the time step. dt meaning change in time.
 
@@ -88,14 +97,20 @@ replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run
 def change_num_particles(num):
     global numParticles, x, y, vx, vy, cx, cy, scatterList, scatter
     try:
-        numParticles = int(num)
+        num = int(num)
+        if num < 1:
+            print("Number of particles must be greater than or equal to 1. Please try again.")
+            return
+        else:
+            numParticles = num
     except ValueError:
+        print("Invalid input. Please enter a valid integer.")
         return
 
     # update title with new number of particles
     ax.set_title("{}-body Simulation".format(numParticles))
 
-    # new positions and velocities
+    # new/initial positions and velocities
     x = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [x]
     y = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [y]
     vx = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial x-velocity
