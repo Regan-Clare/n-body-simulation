@@ -4,8 +4,11 @@ import matplotlib.animation as anim  # allows for animating the particles
 from matplotlib.widgets import Button  # allows me to use button widgets
 from matplotlib.widgets import TextBox  # allows me to use text widgets
 
-
+# NOTES:
 # I am writing variables in lowerCamelCase and functions in snake_case
+# This n-body simulation has randomised initial positions and velocities.
+# The mass, colours of particles/buttons/lines, and range of velocities and positions can be changed in the code
+# The parameters are NOT realistic, I am not using realistic time, velocity, mass, distance, and gravitational constant
 
 # SECTION 1 - PARAMETERS AND CANVAS/GRAPH
 
@@ -25,10 +28,10 @@ dt = 0.005  # this is the time step. dt meaning change in time.
 
 
 # position and velocity variables - low/high is the range for which the values are randomised
-x = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [x]
-y = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [y]
-vx = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial x-velocity
-vy = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial y-velocity
+x = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [x]... range 0.2 - 9.8
+y = np.random.uniform(low=0.2, high=9.8, size=numParticles)  # initial positions [y]... range 0.2 - 9.8
+vx = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial x-velocity... range 0 - 0.2
+vy = np.random.uniform(low=0, high=0.2, size=numParticles)  # initial y-velocity... range 0 - 0.2
 
 cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
 cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
