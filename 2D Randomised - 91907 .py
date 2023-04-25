@@ -44,8 +44,8 @@ ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
 
 # Graph titles and axis names
 plt.title("{}-body Simulation".format(numParticles))  # title for simulation
-plt.xlabel("Astronomical Unit (AU)")  # x-label
-plt.ylabel("Astronomical Unit (AU)")  # y-label
+plt.xlabel("Arbitrary distance")  # x-label
+plt.ylabel("Arbitrary distance")  # y-label
 
 # SECTION 2 - BUTTONS AND UI
 
@@ -132,7 +132,7 @@ def change_num_particles(num):
 
 
 particleTextPos = plt.axes([0.58, 0.95, 0.05, 0.05])  # position of replay function
-particleText = TextBox(particleTextPos, 'Change Number of Bodies to:', color='white', hovercolor='grey')
+particleText = TextBox(particleTextPos, 'Change Number of Particles to:', color='white', hovercolor='grey')
 particleText.on_text_change(change_num_particles)  # when text is submitted, run the function
 
 
@@ -163,7 +163,7 @@ lines()
 def initial_conditions():
     for i in range(numParticles):
         lineList[i].set_data(cx[i], cy[i])  # setting x, y data corresponding to the ith particle in initial position
-        scatterList[i].set_data(x[i], y[i])  # setting x, y data corresponding to the ith particle in initial position
+        scatterList[i].set_data([x[i]], [y[i]])  # setting x, y data corresponding to the ith particle in initial position
 
     return scatterList + [line]
 
