@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # defining initial conditions
 numParticles = int(input("How many particles in this system?: "))
-m = 2  # Mass
+m = 2  # mass
 dt = 0.01  # this is the time step. dt meaning change in time.
 
 # fixing value errors for start of simulation
@@ -37,26 +37,27 @@ cz = [[] for _ in range(numParticles)]  # new positions for z-value on particles
 
 # CANVAS
 
-# Create a 3D figure
+# create a 3D figure
 fig = plt.figure(figsize=(12, 9))
 ax = fig.add_subplot(111, projection='3d')
 
-# Set the background color to grey
+# set the background color to grey
 ax.set_facecolor('grey')
 
-# Remove grid lines
+# remove grid lines
 ax.grid(False)
+
 # remove x, y, z labels
 ax.set_xticklabels([])
 ax.set_yticklabels([])
 ax.set_zticklabels([])
 
-# Remove axis ticks
+# remove axis ticks
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_zticks([])
 
-# Customize the plot
+# customize the plot
 ax.set_xlim(0, 11)
 ax.set_ylim(0, 11)
 ax.set_zlim(0, 11)
@@ -67,16 +68,22 @@ ax.set_title('3D N-Body Simulation')
 # BUTTONS AND UI
 
 
-# Define function to handle scroll events
+# variable for zooming in and out of graph
+zoom = 1.0
+
+
 def on_scroll(event):
-    if event.button == 'up':
-        ax.dist = max(ax.dist - 0.5, 0)
-    elif event.button == 'down':
-        ax.dist += 0.5
-    fig.canvas.draw()
+    global zoom
+    if event.button == 'up':  # if scroll wheel is moved up...
+        zoom -= 0.1  # then subtract 0.1 to the zoom, making the zoom smaller
+
+    elif event.button == 'down':  # if scroll wheel is moved down...
+        zoom += 0.1  # then add 0.1 to the zoom, making the zoom larger
+
+    ax.set_box_aspect(None, zoom=zoom)  # update the zoom in here
+    fig.canvas.draw()  # update on canvas
 
 
-# Connect scroll event to function
 fig.canvas.mpl_connect('scroll_event', on_scroll)
 
 # FUNCTIONS AND CALCULATIONS
@@ -95,7 +102,7 @@ def lines():
         rand_colour = np.random.rand(3)  # RGB RNG between 0 and 1 three times. So lines and particles are same colour
         faded_colour = tuple(np.append(rand_colour, 0.6))  # rgba, a = alpha value => translucent
 
-        scatter, = ax.plot([], [], [], 'o', markersize=4, color=rand_colour)  # plots the particles on the graph
+        scatter, = ax.plot([], [], [], 'o', markersize=5, color=rand_colour)  # plots the particles on the graph
         scatter.set_zorder(3)  # brings particles to the front, in front of lines
         scatterList.append(scatter)  # appends the scatter values to the scatter list
 
