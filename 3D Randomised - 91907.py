@@ -1,9 +1,10 @@
+import matplotlib.pyplot
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
 import matplotlib.animation as anim  # allows for animating the particles
+from tkinter import *
 from matplotlib.widgets import Button  # allows me to use button widgets
-from matplotlib.widgets import TextBox  # allows me to use text widgets
-from mpl_toolkits.mplot3d import Axes3D
+
 
 
 # SECTION 1 - INITIAL CONDITIONS AND CANVAS
@@ -38,11 +39,15 @@ cz = [[] for _ in range(numParticles)]  # new positions for z-value on particles
 # CANVAS
 
 # create a 3D figure
-fig = plt.figure(figsize=(12, 9))
+fig = plt.figure(figsize=(15, 9))
 ax = fig.add_subplot(111, projection='3d')
 
 # set the background color to grey
-ax.set_facecolor('grey')
+ax.set_facecolor('black')
+fig.set_facecolor('black')
+
+# subplot configuration tool
+matplotlib.pyplot.subplots_adjust(bottom=0.01, top=0.96, left=0.1, right=0.9)
 
 # remove grid lines
 ax.grid(False)
@@ -62,7 +67,7 @@ ax.set_xlim(0, 11)
 ax.set_ylim(0, 11)
 ax.set_zlim(0, 11)
 
-ax.set_title('3D N-Body Simulation')
+ax.set_title('3D N-Body Simulation', color='white')
 
 
 # BUTTONS AND UI
@@ -75,16 +80,45 @@ zoom = 1.0
 def on_scroll(event):
     global zoom
     if event.button == 'up':  # if scroll wheel is moved up...
-        zoom -= 0.1  # then subtract 0.1 to the zoom, making the zoom smaller
+        zoom += 0.1  # then zoom in
 
     elif event.button == 'down':  # if scroll wheel is moved down...
-        zoom += 0.1  # then add 0.1 to the zoom, making the zoom larger
+        zoom -= 0.1  # then zoom out
 
     ax.set_box_aspect(None, zoom=zoom)  # update the zoom in here
     fig.canvas.draw()  # update on canvas
 
 
 fig.canvas.mpl_connect('scroll_event', on_scroll)
+
+
+# menu button
+def menu(event):
+    root = Tk()
+    root.geometry("500x300")
+
+    mb = Menubutton(root, text="Information")
+    mb.menu = Menu(mb)
+    mb["menu"] = mb.menu
+
+    info_text = """Information
+    
+        1. To navigate in 3-dimension, hold right click on the graph and move the mouse
+        
+        2. To zoom in and out, use the scroll wheel
+        
+        3. To adjust particle position, hold left click on graph and move mouse up/down"""
+
+    info_label = Label(root, text=info_text, justify=LEFT)
+    info_label.pack()
+
+    root.mainloop()
+
+
+menuButtonPos = plt.axes([0.05, 0.8, 0.1, 0.1])  # position of replay function
+menuButton = Button(menuButtonPos, 'Menu', color='white', hovercolor='grey')  # conditions for replay button
+menuButton.on_clicked(menu)  # when replay button is clicked, run replay function
+
 
 # FUNCTIONS AND CALCULATIONS
 
