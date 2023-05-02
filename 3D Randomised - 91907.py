@@ -6,8 +6,7 @@ from tkinter import *
 from matplotlib.widgets import Button, Slider  # allows me to use button and slider widgets
 
 
-
-# SECTION 1 - INITIAL CONDITIONS AND CANVAS
+# INITIAL CONDITIONS AND CANVAS
 
 
 # defining initial conditions
@@ -31,12 +30,10 @@ z = np.random.uniform(low=0.5, high=10.5, size=numParticles)  # initial position
 vx = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial x-velocity... range 0 - 0.2
 vy = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial y-velocity... range 0 - 0.2
 vz = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial z-velocity... range 0 - 0.2
-
 cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
 cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
 cz = [[] for _ in range(numParticles)]  # new positions for z-value on particles
 
-# CANVAS
 
 # create a 3D figure
 fig = plt.figure(figsize=(15, 9))
@@ -70,7 +67,7 @@ ax.set_zlim(0, 11)
 ax.set_title('3D N-Body Simulation', color='black')
 
 
-# FUNCTIONS AND CALCULATIONS
+# CALCULATIONS
 
 
 # trail line function
@@ -100,7 +97,7 @@ lines()
 # initial conditions
 def initial_conditions():
     for i in range(numParticles):
-        lineList[i].set_data_3d(cx[i], cy[i], cz[i])  # setting x, y data corresponding to the ith particle in initial position
+        lineList[i].set_data_3d(cx[i], cy[i], cz[i])
         scatterList[i].set_data_3d([x[i]], [y[i]], [z[i]])
 
     return scatterList + [line]
@@ -126,7 +123,7 @@ def update(frame):
             dy = y[j] - y[i]  # calculates difference of y-position of jth particle to y-position of ith particle
             dz = z[j] - z[i]  # calculates difference of z-position of jth particle to z-position of ith particle
 
-            r = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)  # pair-wise distance between two objects, calculated using pythagoras
+            r = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)  # pair-wise distance between two objects
             # check for collision
             if r < softeningLength:  # if the radius is less than 0.1...
                 r = softeningLength  # set it to 0.1
@@ -162,8 +159,8 @@ def update(frame):
 # BUTTONS AND UI
 
 
-# variable for zooming in and out of graph
-zoom = 1.0
+# scroll wheel
+zoom = 1.0  # variable for zooming in and out of graph
 
 
 def on_scroll(event):
@@ -194,9 +191,11 @@ def menu(event):
 
         1. To navigate in 3-dimension, hold right click on the graph and move the mouse
 
-        2. To zoom in and out, use the scroll wheel
+        2. To zoom in and out of graph, use the scroll wheel
 
-        3. To adjust particle position, hold left click on graph and move mouse up/down"""
+        3. To zoom particle position in/out, hold left click on graph and move mouse up/down
+        
+        4. To move the particles around, hold MMB and drag around"""
 
     info_label = Label(root, text=info_text, justify=LEFT)
     info_label.pack()
@@ -204,21 +203,51 @@ def menu(event):
     root.mainloop()
 
 
-menuButtonPos = plt.axes([0.05, 0.8, 0.1, 0.1])  # position of menu button
+menuButtonPos = plt.axes([0.845, 0.8, 0.1, 0.1])  # position of menu button
 menuButton = Button(menuButtonPos, 'Menu', color='white', hovercolor='grey')  # conditions for menu button
 menuButton.on_clicked(menu)  # when menu button is clicked, run menu function
 
 
 # slider for mass
-massSliderPos = plt.axes([0.09, 0.5, 0.1, 0.1])  # position of mass slider
+massSliderPos = plt.axes([0.09, 0.8, 0.1, 0.1])  # position of mass slider
 massSlider = Slider(ax=massSliderPos, label='Mass [10^4kg]', valmin=0.1, valmax=50, valinit=m, color='white')
 massSlider.on_changed(update)
 
 
 # slider for time step
-timeSliderPos = plt.axes([0.09, 0.3, 0.1, 0.1])
+timeSliderPos = plt.axes([0.09, 0.6, 0.1, 0.1])
 timeSlider = Slider(ax=timeSliderPos, label='Time Step [dt]', valmin=0, valmax=0.1, valinit=dt, color='white')
 timeSlider.on_changed(update)
+
+
+# replay button
+# I decided the best way to approach this is to save the initial conditions in a list, then access them for the reset
+initialConditionsLog = []
+
+
+def save_initial_conditions():  # saving initial conditions by using appending the values into the list above
+    # positions and velocities are appended to the list
+    initialConditionsLog.append((np.copy(x), np.copy(y), np.copy(z), np.copy(vx), np.copy(vy), np.copy(vz)))
+
+
+save_initial_conditions()
+
+
+def replay_simulation(event):
+    global x, y, z, vx, vy, vz
+    x, y, z, vx, vy, vz = initialConditionsLog[-1]  # -1 accesses the last set of initial conditions in the log
+    for i in range(numParticles):
+        cx[i] = []  # clearing the lists for new positions
+        cy[i] = []
+        cz[i] = []
+    initial_conditions()  # replay the initial conditions
+    save_initial_conditions()  # save the new initial conditions after resetting the simulation
+    return scatterList + lineList
+
+
+replayButtonPos = plt.axes([0.845, 0.6, 0.1, 0.1])  # x, y, width, height
+replayButton = Button(replayButtonPos, 'Replay', color='white', hovercolor='grey')  # conditions for replay button
+replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run replay function
 
 
 ani = anim.FuncAnimation(fig, update, init_func=initial_conditions, interval=1, blit=False, save_count=9000)
