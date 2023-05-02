@@ -3,7 +3,7 @@ import numpy as np  # this library is used for linear algebra. I.e. matrix algeb
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
 import matplotlib.animation as anim  # allows for animating the particles
 from tkinter import *
-from matplotlib.widgets import Button  # allows me to use button widgets
+from matplotlib.widgets import Button, Slider  # allows me to use button and slider widgets
 
 
 
@@ -44,7 +44,7 @@ ax = fig.add_subplot(111, projection='3d')
 
 # set the background color to grey
 ax.set_facecolor('black')
-fig.set_facecolor('black')
+fig.set_facecolor('grey')
 
 # subplot configuration tool
 matplotlib.pyplot.subplots_adjust(bottom=0.01, top=0.96, left=0.1, right=0.9)
@@ -67,57 +67,7 @@ ax.set_xlim(0, 11)
 ax.set_ylim(0, 11)
 ax.set_zlim(0, 11)
 
-ax.set_title('3D N-Body Simulation', color='white')
-
-
-# BUTTONS AND UI
-
-
-# variable for zooming in and out of graph
-zoom = 1.0
-
-
-def on_scroll(event):
-    global zoom
-    if event.button == 'up':  # if scroll wheel is moved up...
-        zoom += 0.1  # then zoom in
-
-    elif event.button == 'down':  # if scroll wheel is moved down...
-        zoom -= 0.1  # then zoom out
-
-    ax.set_box_aspect(None, zoom=zoom)  # update the zoom in here
-    fig.canvas.draw()  # update on canvas
-
-
-fig.canvas.mpl_connect('scroll_event', on_scroll)
-
-
-# menu button
-def menu(event):
-    root = Tk()
-    root.geometry("500x300")
-
-    mb = Menubutton(root, text="Information")
-    mb.menu = Menu(mb)
-    mb["menu"] = mb.menu
-
-    info_text = """Information
-    
-        1. To navigate in 3-dimension, hold right click on the graph and move the mouse
-        
-        2. To zoom in and out, use the scroll wheel
-        
-        3. To adjust particle position, hold left click on graph and move mouse up/down"""
-
-    info_label = Label(root, text=info_text, justify=LEFT)
-    info_label.pack()
-
-    root.mainloop()
-
-
-menuButtonPos = plt.axes([0.05, 0.8, 0.1, 0.1])  # position of replay function
-menuButton = Button(menuButtonPos, 'Menu', color='white', hovercolor='grey')  # conditions for replay button
-menuButton.on_clicked(menu)  # when replay button is clicked, run replay function
+ax.set_title('3D N-Body Simulation', color='black')
 
 
 # FUNCTIONS AND CALCULATIONS
@@ -164,8 +114,11 @@ softeningLength = 0.2  # softening for collisions to mitigate unrealistic collis
 
 # updating parameters
 def update(frame):
-    global x, y, z, vx, vy, vz, r, cx, cy, cz
+    global x, y, z, vx, vy, vz, r, cx, cy, cz, m, dt
     r = 0  # this is just so r is initialized before the nested for loop
+
+    m = massSlider.val
+    dt = timeSlider.val
 
     for i in range(numParticles):
         for j in range(i + 1, numParticles):
@@ -204,6 +157,68 @@ def update(frame):
         line.set_data_3d(cx[i], cy[i], cz[i])  # plot curve for each particle
 
     return scatterList + [line] + lineList
+
+
+# BUTTONS AND UI
+
+
+# variable for zooming in and out of graph
+zoom = 1.0
+
+
+def on_scroll(event):
+    global zoom
+    if event.button == 'up':  # if scroll wheel is moved up...
+        zoom += 0.1  # then zoom in
+
+    elif event.button == 'down':  # if scroll wheel is moved down...
+        zoom -= 0.1  # then zoom out
+
+    ax.set_box_aspect(None, zoom=zoom)  # update the zoom in here
+    fig.canvas.draw()  # update on canvas
+
+
+fig.canvas.mpl_connect('scroll_event', on_scroll)
+
+
+# menu button
+def menu(event):
+    root = Tk()
+    root.geometry("500x300")
+
+    mb = Menubutton(root, text="Information")
+    mb.menu = Menu(mb)
+    mb["menu"] = mb.menu
+
+    info_text = """Information
+
+        1. To navigate in 3-dimension, hold right click on the graph and move the mouse
+
+        2. To zoom in and out, use the scroll wheel
+
+        3. To adjust particle position, hold left click on graph and move mouse up/down"""
+
+    info_label = Label(root, text=info_text, justify=LEFT)
+    info_label.pack()
+
+    root.mainloop()
+
+
+menuButtonPos = plt.axes([0.05, 0.8, 0.1, 0.1])  # position of menu button
+menuButton = Button(menuButtonPos, 'Menu', color='white', hovercolor='grey')  # conditions for menu button
+menuButton.on_clicked(menu)  # when menu button is clicked, run menu function
+
+
+# slider for mass
+massSliderPos = plt.axes([0.09, 0.5, 0.1, 0.1])  # position of mass slider
+massSlider = Slider(ax=massSliderPos, label='Mass [10^4kg]', valmin=0.1, valmax=50, valinit=m, color='white')
+massSlider.on_changed(update)
+
+
+# slider for time step
+timeSliderPos = plt.axes([0.09, 0.3, 0.1, 0.1])
+timeSlider = Slider(ax=timeSliderPos, label='Time Step [dt]', valmin=0, valmax=0.1, valinit=dt, color='white')
+timeSlider.on_changed(update)
 
 
 ani = anim.FuncAnimation(fig, update, init_func=initial_conditions, interval=1, blit=False, save_count=9000)
