@@ -3,7 +3,7 @@ import numpy as np  # this library is used for linear algebra. I.e. matrix algeb
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
 import matplotlib.animation as anim  # allows for animating the particles
 from tkinter import *
-from matplotlib.widgets import Button, Slider  # allows me to use button and slider widgets
+from matplotlib.widgets import Button, Slider, TextBox  # allows me to use button and slider widgets
 
 
 # INITIAL CONDITIONS AND CANVAS
@@ -64,7 +64,7 @@ ax.set_xlim(0, 11)
 ax.set_ylim(0, 11)
 ax.set_zlim(0, 11)
 
-ax.set_title('3D N-Body Simulation', color='black')
+ax.set_title('3D {}-Body Simulation'.format(numParticles), color='black')
 
 
 # CALCULATIONS
@@ -248,6 +248,51 @@ def replay_simulation(event):
 replayButtonPos = plt.axes([0.845, 0.6, 0.1, 0.1])  # x, y, width, height
 replayButton = Button(replayButtonPos, 'Replay', color='white', hovercolor='grey')  # conditions for replay button
 replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run replay function
+
+
+# change number of particles during simulation
+def change_num_particles(num):
+    global numParticles, x, y, z, vx, vy, vz, cx, cy, cz, scatterList, scatter
+    try:
+        num = int(num)
+        if num < 1:
+            print("Number of particles must be greater than or equal to 1. Please try again.")
+            return
+        else:
+            numParticles = num
+    except ValueError:
+        print("Invalid input. Please enter a valid integer.")
+        return
+
+    # update title with new number of particles
+    ax.set_title("3D {}-body Simulation".format(numParticles))
+
+    # new/initial positions and velocities
+    x = np.random.uniform(low=0.5, high=10.5, size=numParticles)  # initial positions [x]... range 0.5 - 10.5
+    y = np.random.uniform(low=0.5, high=10.5, size=numParticles)  # initial positions [y]... range 0.5 - 10.5
+    z = np.random.uniform(low=0.5, high=10.5, size=numParticles)  # initial positions [z]... range 0.5 - 10.5
+    vx = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial x-velocity... range 0 - 0.2
+    vy = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial y-velocity... range 0 - 0.2
+    vz = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial z-velocity... range 0 - 0.2
+    cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
+    cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
+    cz = [[] for _ in range(numParticles)]  # new positions for z-value on particles
+
+    # remove old scatter plot
+    for s in scatterList:
+        s.remove()
+    for l in lineList:
+        l.remove()
+    # calling functions - basically re-running the code
+    lines()
+    save_initial_conditions()
+    initial_conditions()
+    update(frame=60)
+
+
+particleTextPos = plt.axes([0.155, 0.5, 0.05, 0.05])  # position of replay function
+particleText = TextBox(particleTextPos, 'Change Number of Particles to:', color='white', hovercolor='grey')
+particleText.on_text_change(change_num_particles)  # when text is submitted, run the function
 
 
 ani = anim.FuncAnimation(fig, update, init_func=initial_conditions, interval=1, blit=False, save_count=9000)
