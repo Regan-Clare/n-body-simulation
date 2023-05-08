@@ -2,7 +2,7 @@
 
 This is my n-body simulation for CSC 91907 and 91903.
 
-I have created three scripts to demonstrate my development and learning process throught the creation of these simulations.
+I have created three scripts to document my process and learning process throughout the development of these simulations.
 
 The first script (2D n-body) is a 2-dimensional n-body simulation written in python using PyCharm IDE. This uses matplotlib for the graphing design.
 
