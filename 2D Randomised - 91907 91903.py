@@ -40,7 +40,8 @@ cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
 # CANVAS
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
-
+# set the background color to grey
+ax.set_facecolor('grey')
 
 # Graph titles and axis names
 plt.title("{}-body Simulation".format(numParticles))  # title for simulation
@@ -62,7 +63,7 @@ def on_pause(event):
         pauseButton.label.set_text('Pause')  # if animation true, set text to 'Pause'
 
 
-pauseButtonPos = plt.axes([0.8, 0.9, 0.1, 0.1])  # position of pause button
+pauseButtonPos = plt.axes((0.8, 0.9, 0.1, 0.1))  # position of pause button
 pauseButton = Button(pauseButtonPos, 'Pause', color='white', hovercolor='grey')  # conditions of pause button
 pauseButton.on_clicked(on_pause)  # when button is clicked, run onPause function
 
@@ -91,7 +92,7 @@ def replay_simulation(event):
     return scatterList + lineList
 
 
-replayButtonPos = plt.axes([0.125, 0.9, 0.1, 0.1])  # position of replay function
+replayButtonPos = plt.axes((0.125, 0.9, 0.1, 0.1))  # position of replay function
 replayButton = Button(replayButtonPos, 'Replay', color='white', hovercolor='grey')  # conditions for replay button
 replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run replay function
 
@@ -131,7 +132,7 @@ def change_num_particles(num):
     update(frame=60)
 
 
-particleTextPos = plt.axes([0.58, 0.95, 0.05, 0.05])  # position of replay function
+particleTextPos = plt.axes((0.58, 0.95, 0.05, 0.05))  # position of replay function
 particleText = TextBox(particleTextPos, 'Change Number of Particles to:', color='white', hovercolor='grey')
 particleText.on_text_change(change_num_particles)  # when text is submitted, run the function
 
@@ -145,14 +146,16 @@ def lines():
     lineList = []  # empty list for plotting line positions
     scatterList = []  # empty list for plotting positions
     for i in range(numParticles):
+        rand_colour = np.random.rand(3)  # RGB RNG between 0 and 1 three times. So lines and particles are same colour
+        faded_colour = tuple(np.append(rand_colour, 0.6))  # rgba, a = alpha value => translucent
         cx[i] = []  # empty list for x-position of line for ith particle
         cy[i] = []  # empty list for y-position of line for ith particle
-        scatter, = ax.plot([], [], 'o', markersize=4, color='black')  # plots the particles on the graph
+        scatter, = ax.plot([], [], 'o', markersize=4, color=rand_colour)  # plots the particles on the graph
         # z-order determines the order in which different elements are drawn, since 3 > z, particles in front of lines
         # short for z-axis-order
         scatter.set_zorder(3)  # brings particles to the front, in front of lines
         scatterList.append(scatter)  # appends the scatter values to the scatter list
-        line, = ax.plot([], [], '-', color='purple')  # plots the trail lines on the graph
+        line, = ax.plot([], [], '-', color=faded_colour)  # plots the trail lines on the graph
         lineList.append(line)  # appends the line values to the line list
 
 

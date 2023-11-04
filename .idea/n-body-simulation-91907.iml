@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/pythonProject/ven" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (n-body-simulation-91907)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (n-body-simulation-91907-and-91903)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

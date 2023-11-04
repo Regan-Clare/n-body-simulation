@@ -2,17 +2,16 @@ import matplotlib.pyplot
 import numpy as np  # this library is used for linear algebra. I.e. matrix algebra
 import matplotlib.pyplot as plt  # use for plotting data on a canvas
 import matplotlib.animation as anim  # allows for animating the particles
-from tkinter import *
 from matplotlib.widgets import Button, Slider, TextBox  # allows me to use button and slider widgets
-
-
-# INITIAL CONDITIONS AND CANVAS
+import pygame
 
 
 # defining initial conditions
 numParticles = int(input("How many particles in this system?: "))
 m = 2  # mass
 dt = 0.01  # this is the time step. dt meaning change in time.
+softeningLength = 0.2  # softening for collisions to mitigate unrealistic collisions
+initialConditionsLog = []
 
 # fixing value errors for start of simulation
 while numParticles < 1:
@@ -33,7 +32,6 @@ vz = np.random.uniform(low=0, high=0.5, size=numParticles)  # initial z-velocity
 cx = [[] for _ in range(numParticles)]  # new positions for x-value on particles
 cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
 cz = [[] for _ in range(numParticles)]  # new positions for z-value on particles
-
 
 # create a 3D figure
 fig = plt.figure(figsize=(15, 9))
@@ -65,9 +63,6 @@ ax.set_ylim(0, 11)
 ax.set_zlim(0, 11)
 
 ax.set_title('3D {}-Body Simulation'.format(numParticles), color='black')
-
-
-# CALCULATIONS
 
 
 # trail line function
@@ -104,9 +99,6 @@ def initial_conditions():
 
 
 initial_conditions()
-
-
-softeningLength = 0.2  # softening for collisions to mitigate unrealistic collisions
 
 
 # updating parameters
@@ -156,9 +148,6 @@ def update(frame):
     return scatterList + [line] + lineList
 
 
-# BUTTONS AND UI
-
-
 # scroll wheel
 zoom = 1.0  # variable for zooming in and out of graph
 
@@ -178,49 +167,16 @@ def on_scroll(event):
 fig.canvas.mpl_connect('scroll_event', on_scroll)
 
 
-# menu button
-def menu(event):
-    root = Tk()
-    root.geometry("500x300")
-
-    mb = Menubutton(root, text="Information")
-    mb.menu = Menu(mb)
-    mb["menu"] = mb.menu
-
-    info_text = """Information
-
-        1. To navigate in 3-dimension, hold right click on the graph and move the mouse
-
-        2. To zoom in and out of graph, use the scroll wheel
-
-        3. To zoom particle position in/out, hold left click on graph and move mouse up/down
-        
-        4. To move the particles around, hold MMB and drag around"""
-
-    info_label = Label(root, text=info_text, justify=LEFT)
-    info_label.pack()
-
-    root.mainloop()
-
-
-menuButtonPos = plt.axes([0.845, 0.8, 0.1, 0.1])  # position of menu button
-menuButton = Button(menuButtonPos, 'Menu', color='white', hovercolor='grey')  # conditions for menu button
-menuButton.on_clicked(menu)  # when menu button is clicked, run menu function
-
-
 # slider for mass
-massSliderPos = plt.axes([0.09, 0.8, 0.1, 0.1])  # position of mass slider
+massSliderPos = plt.axes((0.09, 0.8, 0.1, 0.1))  # position of mass slider
 massSlider = Slider(ax=massSliderPos, label='Mass [10^4kg]', valmin=0.1, valmax=50, valinit=m, color='white')
 massSlider.on_changed(update)
 
-
 # slider for time step
-timeSliderPos = plt.axes([0.09, 0.6, 0.1, 0.1])
+timeSliderPos = plt.axes((0.09, 0.6, 0.1, 0.1))
 timeSlider = Slider(ax=timeSliderPos, label='Time Step [dt]', valmin=0, valmax=0.1, valinit=dt, color='white')
 timeSlider.on_changed(update)
 
-
-# replay button
 # I decided the best way to approach this is to save the initial conditions in a list, then access them for the reset
 initialConditionsLog = []
 
@@ -245,7 +201,8 @@ def replay_simulation(event):
     return scatterList + lineList
 
 
-replayButtonPos = plt.axes([0.845, 0.6, 0.1, 0.1])  # x, y, width, height
+# replay button
+replayButtonPos = plt.axes((0.845, 0.6, 0.1, 0.1))  # x, y, width, height
 replayButton = Button(replayButtonPos, 'Replay', color='white', hovercolor='grey')  # conditions for replay button
 replayButton.on_clicked(replay_simulation)  # when replay button is clicked, run replay function
 
@@ -290,7 +247,7 @@ def change_num_particles(num):
     update(frame=60)
 
 
-particleTextPos = plt.axes([0.155, 0.5, 0.05, 0.05])  # position of replay function
+particleTextPos = plt.axes((0.155, 0.5, 0.05, 0.05))  # position of replay function
 particleText = TextBox(particleTextPos, 'Change Number of Particles to:', color='white', hovercolor='grey')
 particleText.on_text_change(change_num_particles)  # when text is submitted, run the function
 
