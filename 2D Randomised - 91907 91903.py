@@ -40,8 +40,6 @@ cy = [[] for _ in range(numParticles)]  # new positions for y-value on particles
 # CANVAS
 fig = plt.figure(figsize=(10, 10))  # the size of the canvas
 ax = plt.axes(xlim=(0, 10), ylim=(0, 10))  # the size of the axis points
-# set the background color to grey
-ax.set_facecolor('grey')
 
 # Graph titles and axis names
 plt.title("{}-body Simulation".format(numParticles))  # title for simulation
